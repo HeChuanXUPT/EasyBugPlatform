@@ -1,0 +1,5 @@
+.class
+.idea/
+api/target/
+front/node_modules
+package-lock.json
