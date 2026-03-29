@@ -7,7 +7,8 @@
                     <el-descriptions-item label="上报人">{{ getReporterName(info.reporterId) }}</el-descriptions-item>
                     <el-descriptions-item label="当前处理人">{{ getAssigneeName(info.assigneeId) }}</el-descriptions-item>
                     <el-descriptions-item label="状态">{{ info.status }}</el-descriptions-item>
-
+                    <el-descriptions-item label="模块"> {{ info.module || '-' }}
+                    </el-descriptions-item>
                     <!-- 问题描述：保留换行（核心修复） -->
                     <el-descriptions-item label="问题描述">
                         <div style="white-space: pre-wrap; word-break: break-all; margin: 0;">

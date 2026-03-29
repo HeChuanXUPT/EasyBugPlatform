@@ -1,3 +1,5 @@
+-- CREATE DATABASE bug_platform;
+
 -- 项目表
 CREATE TABLE project (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -15,21 +17,25 @@ CREATE TABLE sys_user (
 );
 
 -- 问题表（核心）
-CREATE TABLE issue (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(100) NOT NULL COMMENT '问题标题',
-    project_id BIGINT NOT NULL COMMENT '所属项目',
-    issue_type VARCHAR(20) COMMENT 'BUG/需求反馈/优化建议',
-    severity VARCHAR(10) COMMENT 'P0/P1/P2/P3',
-    priority VARCHAR(10) COMMENT '高/中/低',
-    steps TEXT COMMENT '复现步骤',
-    reporter_id BIGINT NOT NULL COMMENT '上报人ID',
-    assignee_id BIGINT COMMENT '负责人ID',
-    status VARCHAR(20) DEFAULT '待指派' COMMENT '状态',
-    close_reason TEXT COMMENT '关闭原因',
-    create_time DATETIME DEFAULT NOW(),
-    update_time DATETIME DEFAULT NOW()
-);
+CREATE TABLE `issue` (
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`title` VARCHAR(100) NOT NULL COMMENT '问题标题' COLLATE 'utf8mb4_0900_ai_ci',
+	`project_id` BIGINT NOT NULL COMMENT '所属项目',
+	`module` VARCHAR(50) NULL DEFAULT NULL COMMENT '模块' COLLATE 'utf8mb4_0900_ai_ci',
+	`issue_type` VARCHAR(20) NULL DEFAULT NULL COMMENT 'BUG/需求反馈/优化建议' COLLATE 'utf8mb4_0900_ai_ci',
+	`severity` VARCHAR(10) NULL DEFAULT NULL COMMENT 'P0/P1/P2/P3' COLLATE 'utf8mb4_0900_ai_ci',
+	`priority` VARCHAR(10) NULL DEFAULT NULL COMMENT '高/中/低' COLLATE 'utf8mb4_0900_ai_ci',
+	`content` TEXT NULL DEFAULT NULL COMMENT '问题描述' COLLATE 'utf8mb4_0900_ai_ci',
+	`reporter_id` BIGINT NOT NULL COMMENT '上报人ID',
+	`assignee_id` BIGINT NULL DEFAULT NULL COMMENT '负责人ID',
+	`status` VARCHAR(20) NULL DEFAULT '待指派' COMMENT '状态' COLLATE 'utf8mb4_0900_ai_ci',
+	`solution` TEXT NULL DEFAULT NULL COMMENT '解决方法' COLLATE 'utf8mb4_0900_ai_ci',
+	`create_time` DATETIME NULL DEFAULT (CURRENT_TIMESTAMP),
+	`update_time` DATETIME NULL DEFAULT (CURRENT_TIMESTAMP),
+	PRIMARY KEY (`id`) USING BTREE
+)
+;
+
 
 -- 问题流转记录表
 CREATE TABLE issue_flow (

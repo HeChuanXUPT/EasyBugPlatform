@@ -11,17 +11,18 @@ import java.time.LocalDateTime;
 @TableName("issue")
 public class Issue {
     @TableId(type = IdType.AUTO)
-    private Long id;
-    private String title;
-    private Long projectId;
-    private String issueType;
-    private String severity;
-    private String priority;
-    private String content;
-    private Long reporterId;
-    private Long assigneeId;
-    private String status;
-    private String solution;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
+    Long id;
+    String title;
+    Long projectId;
+    String module;
+    String issueType;
+    String severity;
+    String priority;
+    String content;
+    Long reporterId;
+    Long assigneeId;
+    String status;
+    String solution;
+    LocalDateTime createTime;
+    LocalDateTime updateTime;
 }

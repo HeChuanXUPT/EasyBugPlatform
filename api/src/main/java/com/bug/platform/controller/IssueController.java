@@ -96,12 +96,16 @@ public class IssueController {
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) Long projectId,
+            @RequestParam(required = false) String module,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long assigneeId,
             @RequestParam(required = false) String issueType,
             @RequestParam(required = false) String severity,
             @RequestParam(required = false) String title) {
         LambdaQueryWrapper<Issue> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(projectId != null, Issue::getProjectId, projectId)
+                .eq(StringUtils.hasText(module), Issue::getModule, module)
+                .eq(assigneeId != null, Issue::getAssigneeId, assigneeId)
                 .eq(StringUtils.hasText(status), Issue::getStatus, status)
                 .eq(StringUtils.hasText(issueType), Issue::getIssueType, issueType)
                 .eq(StringUtils.hasText(severity), Issue::getSeverity, severity)
