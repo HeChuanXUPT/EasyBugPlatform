@@ -28,7 +28,7 @@ CREATE TABLE `issue` (
 	`content` TEXT NULL DEFAULT NULL COMMENT '问题描述' COLLATE 'utf8mb4_0900_ai_ci',
 	`reporter_id` BIGINT NOT NULL COMMENT '上报人ID',
 	`assignee_id` BIGINT NULL DEFAULT NULL COMMENT '负责人ID',
-	`status` VARCHAR(20) NULL DEFAULT '待指派' COMMENT '状态' COLLATE 'utf8mb4_0900_ai_ci',
+	`status` VARCHAR(20) NULL DEFAULT '处理中、待验证、已验证、关闭' COMMENT '状态' COLLATE 'utf8mb4_0900_ai_ci',
 	`solution` TEXT NULL DEFAULT NULL COMMENT '解决方法' COLLATE 'utf8mb4_0900_ai_ci',
 	`create_time` DATETIME NULL DEFAULT (CURRENT_TIMESTAMP),
 	`update_time` DATETIME NULL DEFAULT (CURRENT_TIMESTAMP),

@@ -52,13 +52,15 @@
         <el-col :span="12">
             <el-card title="流转记录">
                 <el-timeline>
-                    <el-timeline-item v-for="f in flows" :key="f.id">
-                        <div style="font-weight:bold">{{ getUserName(f.operatorId) }}</div>
-                        <div style="margin:5px 0;color:#333">
-                            {{ f.oldStatus || '初始' }} → {{ f.newStatus }}
-                        </div>
-                        <div style="font-size:12px;color:#666">{{ f.remark }}</div>
-                        <div style="font-size:11px;color:#999">{{ f.createTime }}</div>
+                    <!-- 全部一行显示：用户 → 状态 → 描述 → 时间 -->
+                    <el-timeline-item v-for="f in [...flows].reverse()" :key="f.id" style="line-height: 1.5;">
+                        <span style="font-weight: bold;margin-right:8px;">{{ getUserName(f.operatorId) }}</span>
+                        <span style="margin:0 8px;color:#666;">|</span>
+                        <span style="margin-right:8px;">{{ f.oldStatus || '初始' }} → {{ f.newStatus }}</span>
+                        <span style="margin:0 8px;color:#666;">|</span>
+                        <span style="margin-right:8px;">{{ f.remark }}</span>
+                        <span style="margin:0 8px;color:#666;">|</span>
+                        <span style="color:#999;font-size:12px;">{{ f.createTime }}</span>
                     </el-timeline-item>
                 </el-timeline>
             </el-card>

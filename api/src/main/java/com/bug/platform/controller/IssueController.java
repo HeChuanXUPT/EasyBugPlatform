@@ -31,12 +31,12 @@ public class IssueController {
     // 上报问题
     @PostMapping("/report")
     public Result report(@RequestBody Issue issue) {
-        issue.setStatus("待指派");
+        issue.setStatus("处理中");
         issue.setCreateTime(LocalDateTime.now());
         issue.setUpdateTime(LocalDateTime.now());
         issueService.save(issue);
         // 记录流转
-        flowService.save(new IssueFlow(issue.getId(), issue.getReporterId(), null, "待指派", "问题上报成功"));
+        flowService.save(new IssueFlow(issue.getId(), issue.getReporterId(), null, "处理中", "问题上报成功"));
         return Result.success();
     }
 
