@@ -31,12 +31,12 @@ public class IssueController {
     // 上报问题
     @PostMapping("/report")
     public Result report(@RequestBody Issue issue) {
-        issue.setStatus("待指派");
+        issue.setStatus("处理中");
         issue.setCreateTime(LocalDateTime.now());
         issue.setUpdateTime(LocalDateTime.now());
         issueService.save(issue);
         // 记录流转
-        flowService.save(new IssueFlow(issue.getId(), issue.getReporterId(), null, "待指派", "问题上报成功"));
+        flowService.save(new IssueFlow(issue.getId(), issue.getReporterId(), null, "处理中", "问题上报成功"));
         return Result.success();
     }
 
@@ -96,12 +96,16 @@ public class IssueController {
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) Long projectId,
+            @RequestParam(required = false) String module,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long assigneeId,
             @RequestParam(required = false) String issueType,
             @RequestParam(required = false) String severity,
             @RequestParam(required = false) String title) {
         LambdaQueryWrapper<Issue> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(projectId != null, Issue::getProjectId, projectId)
+                .eq(StringUtils.hasText(module), Issue::getModule, module)
+                .eq(assigneeId != null && assigneeId != 1, Issue::getAssigneeId, assigneeId) // 1是管理员
                 .eq(StringUtils.hasText(status), Issue::getStatus, status)
                 .eq(StringUtils.hasText(issueType), Issue::getIssueType, issueType)
                 .eq(StringUtils.hasText(severity), Issue::getSeverity, severity)

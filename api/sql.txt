@@ -1,52 +1,65 @@
--- 项目表
-CREATE TABLE project (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    project_name VARCHAR(50) NOT NULL COMMENT '项目名称',
-    create_time DATETIME DEFAULT NOW()
+-- bug_platform 的数据库结构
+CREATE DATABASE IF NOT EXISTS `bug_platform` ;
+USE `bug_platform`;
+
+-- 表 bug_platform.issue 结构
+CREATE TABLE IF NOT EXISTS `issue` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL COMMENT '问题标题',
+  `project_id` bigint NOT NULL COMMENT '所属项目',
+  `module` varchar(50) DEFAULT NULL COMMENT '模块',
+  `issue_type` varchar(20) DEFAULT NULL COMMENT 'BUG/需求反馈/优化建议',
+  `severity` varchar(10) DEFAULT NULL COMMENT 'P0/P1/P2/P3',
+  `priority` varchar(10) DEFAULT NULL COMMENT '高/中/低',
+  `content` text CHARACTER SET utf8mb4 COMMENT '问题描述',
+  `reporter_id` bigint NOT NULL COMMENT '上报人ID',
+  `assignee_id` bigint DEFAULT NULL COMMENT '负责人ID',
+  `status` varchar(20) CHARACTER SET utf8mb4 DEFAULT '处理中' COMMENT '状态：处理中、待验证、已验证、关闭',
+  `solution` text CHARACTER SET utf8mb4 COMMENT '解决方法',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 );
 
--- 用户表
-CREATE TABLE sys_user (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(30) NOT NULL UNIQUE,
-    password VARCHAR(60) NOT NULL,
-    role VARCHAR(10) DEFAULT 'USER' COMMENT 'ADMIN/USER',
-    create_time DATETIME DEFAULT NOW()
+--  表 bug_platform.issue_comment 结构
+CREATE TABLE IF NOT EXISTS `issue_comment` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `issue_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `content` text NOT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 );
 
--- 问题表（核心）
-CREATE TABLE issue (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(100) NOT NULL COMMENT '问题标题',
-    project_id BIGINT NOT NULL COMMENT '所属项目',
-    issue_type VARCHAR(20) COMMENT 'BUG/需求反馈/优化建议',
-    severity VARCHAR(10) COMMENT 'P0/P1/P2/P3',
-    priority VARCHAR(10) COMMENT '高/中/低',
-    steps TEXT COMMENT '复现步骤',
-    reporter_id BIGINT NOT NULL COMMENT '上报人ID',
-    assignee_id BIGINT COMMENT '负责人ID',
-    status VARCHAR(20) DEFAULT '待指派' COMMENT '状态',
-    close_reason TEXT COMMENT '关闭原因',
-    create_time DATETIME DEFAULT NOW(),
-    update_time DATETIME DEFAULT NOW()
+
+--  表 bug_platform.issue_flow 结构
+CREATE TABLE IF NOT EXISTS `issue_flow` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `issue_id` bigint NOT NULL,
+  `operator_id` bigint NOT NULL,
+  `old_status` varchar(20) DEFAULT NULL,
+  `new_status` varchar(20) NOT NULL,
+  `remark` text COMMENT '原因',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 );
 
--- 问题流转记录表
-CREATE TABLE issue_flow (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    issue_id BIGINT NOT NULL,
-    operator_id BIGINT NOT NULL,
-    old_status VARCHAR(20),
-    new_status VARCHAR(20) NOT NULL,
-    remark TEXT COMMENT '原因',
-    create_time DATETIME DEFAULT NOW()
+--  表 bug_platform.project 结构
+CREATE TABLE IF NOT EXISTS `project` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(50) NOT NULL COMMENT '项目名称',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 );
 
--- 评论表
-CREATE TABLE issue_comment (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    issue_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    content TEXT NOT NULL,
-    create_time DATETIME DEFAULT NOW()
+-- 表 bug_platform.sys_user 结构
+CREATE TABLE IF NOT EXISTS `sys_user` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `username` varchar(30) NOT NULL,
+  `password` varchar(60) NOT NULL,
+  `role` varchar(10) DEFAULT 'USER' COMMENT 'ADMIN/USER',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
 );
+
