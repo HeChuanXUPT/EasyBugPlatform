@@ -105,7 +105,7 @@ public class IssueController {
         LambdaQueryWrapper<Issue> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(projectId != null, Issue::getProjectId, projectId)
                 .eq(StringUtils.hasText(module), Issue::getModule, module)
-                .eq(assigneeId != null, Issue::getAssigneeId, assigneeId)
+                .eq(assigneeId != null && assigneeId != 1, Issue::getAssigneeId, assigneeId) // 1是管理员
                 .eq(StringUtils.hasText(status), Issue::getStatus, status)
                 .eq(StringUtils.hasText(issueType), Issue::getIssueType, issueType)
                 .eq(StringUtils.hasText(severity), Issue::getSeverity, severity)
