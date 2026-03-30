@@ -80,10 +80,15 @@ public class IssueController {
         Issue issue = issueService.getById(dto.getId());
         String old = issue.getStatus();
         issue.setStatus(dto.getStatus());
-        if ("已关闭".equals(dto.getStatus())) issue.setSolution(dto.getRemark());
+        if ("已关闭".equals(dto.getStatus())) {
+            issue.setSolution(dto.getRemark());
+        }
         issue.setUpdateTime(LocalDateTime.now());
         if (dto.getSolution() != null) {
             issue.setSolution(dto.getSolution());
+        }
+        if (dto.getReason() != null) {
+            issue.setReason(dto.getReason());
         }
         issueService.updateById(issue);
         flowService.save(new IssueFlow(dto.getId(), dto.getOperatorId(), old, dto.getStatus(), dto.getRemark()));
