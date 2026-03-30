@@ -5,6 +5,7 @@ import User from '../views/User.vue'
 import IssueList from '../views/IssueList.vue'
 import IssueAdd from '../views/IssueAdd.vue'
 import IssueDetail from '../views/IssueDetail.vue'
+import Message from '../views/Message.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -13,7 +14,8 @@ const routes = [
   { path: '/user', component: User },
   { path: '/issue', component: IssueList },
   { path: '/issue/add', component: IssueAdd },
-  { path: '/issue/detail/:id', component: IssueDetail }
+  { path: '/issue/detail/:id', component: IssueDetail },
+  { path: '/message', component: Message, meta: { title: '消息通知' } }
 ]
 
 const router = createRouter({

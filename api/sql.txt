@@ -64,3 +64,11 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   UNIQUE KEY `username` (`username`)
 );
 
+CREATE TABLE message (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL COMMENT '接收人ID',
+    title VARCHAR(255) NOT NULL COMMENT '消息标题',
+    issue_id BIGINT COMMENT '关联问题ID',
+    is_read INT DEFAULT 0 COMMENT '0未读 1已读',
+    create_time DATETIME DEFAULT NOW()
+);
