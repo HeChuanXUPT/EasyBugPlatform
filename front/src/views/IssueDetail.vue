@@ -68,10 +68,21 @@
             </el-card>
 
             <el-card title="评论" style="margin-top:10px">
-                <el-input v-model="content" type="textarea" placeholder="输入评论" />
+                <el-input v-model="content" type="textarea" placeholder="输入评论" rows="3" />
                 <el-button type="primary" @click="send" style="margin-top:10px">发送</el-button>
-                <div v-for="c in comments" :key="c.id" style="white-space: pre-wrap; margin-top:10px;">
-                    {{ c.content }}<br><small>{{ c.createTime }}</small>
+
+                <!-- 评论列表：显示 用户名 + 内容 + 时间 -->
+                <div v-for="c in comments" :key="c.id"
+                    style="margin-top:12px; padding-bottom:8px; border-bottom:1px solid #f5f5f5;">
+                    <div style="font-weight:bold; color:#333;">
+                        {{ getUserName(c.userId) }}
+                    </div>
+                    <div style="white-space: pre-wrap; margin:4px 0; color:#555;">
+                        {{ c.content }}
+                    </div>
+                    <div style="font-size:12px; color:#999;">
+                        {{ c.createTime }}
+                    </div>
                 </div>
             </el-card>
         </el-col>
