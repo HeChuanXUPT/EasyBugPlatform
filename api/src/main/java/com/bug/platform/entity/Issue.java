@@ -22,6 +22,7 @@ public class Issue {
     Long reporterId;
     Long assigneeId;
     String status;
+    String reason;
     String solution;
     LocalDateTime createTime;
     LocalDateTime updateTime;

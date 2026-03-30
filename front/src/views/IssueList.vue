@@ -36,6 +36,7 @@
         </el-form>
 
         <el-table :data="list" border>
+            <el-table-column prop="id" label="ID" width="70" align="center" />
             <el-table-column prop="title" label="标题" min-width="200" />
 
             <el-table-column label="项目" width="120">

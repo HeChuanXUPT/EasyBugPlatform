@@ -8,5 +8,6 @@ public class UpdateStatusDto {
     String status;
     Long operatorId;
     String remark;
+    String reason;
     String solution;
 }

@@ -11,6 +11,7 @@ import com.bug.platform.entity.IssueFlow;
 import com.bug.platform.service.IIssueCommentService;
 import com.bug.platform.service.IIssueFlowService;
 import com.bug.platform.service.IIssueService;
+import com.bug.platform.service.IMessageService;
 import com.bug.platform.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -27,6 +28,8 @@ public class IssueController {
     IIssueFlowService flowService;
     @Autowired
     IIssueCommentService commentService;
+    @Autowired
+    IMessageService messageService;
 
     // 上报问题
     @PostMapping("/report")
@@ -71,6 +74,12 @@ public class IssueController {
         issue.setAssigneeId(dto.getAssigneeId());
         issueService.updateById(issue);
         flowService.save(new IssueFlow(dto.getId(), dto.getOperatorId(), old, "处理中", "转派：" + dto.getRemark()));
+        // 发送消息给被指派的人
+        messageService.send(
+                dto.getAssigneeId(),
+                "你有新的问题被指派：问题#" + dto.getId(),
+                dto.getId()
+        );
         return Result.success();
     }
 
@@ -80,10 +89,15 @@ public class IssueController {
         Issue issue = issueService.getById(dto.getId());
         String old = issue.getStatus();
         issue.setStatus(dto.getStatus());
-        if ("已关闭".equals(dto.getStatus())) issue.setSolution(dto.getRemark());
+        if ("已关闭".equals(dto.getStatus())) {
+            issue.setSolution(dto.getRemark());
+        }
         issue.setUpdateTime(LocalDateTime.now());
         if (dto.getSolution() != null) {
             issue.setSolution(dto.getSolution());
+        }
+        if (dto.getReason() != null) {
+            issue.setReason(dto.getReason());
         }
         issueService.updateById(issue);
         flowService.save(new IssueFlow(dto.getId(), dto.getOperatorId(), old, dto.getStatus(), dto.getRemark()));

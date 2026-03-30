@@ -15,7 +15,6 @@
                 <el-input v-model="form.module" placeholder="例如：登录、支付、订单" />
             </el-form-item>
 
-            <!-- 新增：直接指派处理人 -->
             <el-form-item label="指派处理人">
                 <el-select v-model="form.assigneeId" placeholder="请选择处理人" style="width: 240px">
                     <el-option v-for="u in userList" :key="u.id" :label="u.username" :value="u.id" />
@@ -43,7 +42,10 @@
                 <el-input v-model="form.content" type="textarea" rows="4" />
             </el-form-item>
 
-            <el-button type="primary" @click="submit">提交上报</el-button>
+            <el-form-item label=" ">
+                <el-button type="primary" @click="submit">提交上报</el-button>
+                <el-button @click="goBack">返回</el-button>
+            </el-form-item>
         </el-form>
     </el-card>
 </template>
@@ -65,20 +67,18 @@ const form = ref({
     title: '',
     projectId: '',
     module: '',
-    assigneeId: '',  // 指派处理人ID
+    assigneeId: '',
     issueType: 'BUG',
     severity: 'P2',
     content: '',
     reporterId: loginUser.id
 })
 
-// 获取项目
 const getProject = async () => {
     const res = await projectApi.list()
     projects.value = res.data
 }
 
-// 获取用户列表（指派下拉）
 const getUsers = async () => {
     const res = await userApi.list()
     userList.value = res.data
@@ -87,6 +87,10 @@ const getUsers = async () => {
 const submit = async () => {
     await issueApi.report(form.value)
     ElMessage.success('上报成功')
+    router.push('/issue')
+}
+
+const goBack = () => {
     router.push('/issue')
 }
 

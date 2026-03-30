@@ -6,24 +6,27 @@
                     <el-descriptions-item label="标题">{{ info.title }}</el-descriptions-item>
                     <el-descriptions-item label="上报人">{{ getReporterName(info.reporterId) }}</el-descriptions-item>
                     <el-descriptions-item label="当前处理人">{{ getAssigneeName(info.assigneeId) }}</el-descriptions-item>
+                    <el-descriptions-item label="模块">{{ info.module || '-' }}</el-descriptions-item>
                     <el-descriptions-item label="状态">{{ info.status }}</el-descriptions-item>
-                    <el-descriptions-item label="模块"> {{ info.module || '-' }}
-                    </el-descriptions-item>
-                    <!-- 问题描述：保留换行（核心修复） -->
+
                     <el-descriptions-item label="问题描述">
                         <div style="white-space: pre-wrap; word-break: break-all; margin: 0;">
                             {{ info.content }}
                         </div>
                     </el-descriptions-item>
 
-                    <!-- 解决方法：保留换行 -->
+                    <el-descriptions-item label="问题原因" v-if="info.reason">
+                        <div style="white-space: pre-wrap; word-break: break-all; margin: 0;">
+                            {{ info.reason }}
+                        </div>
+                    </el-descriptions-item>
+
                     <el-descriptions-item label="解决方法" v-if="info.solution">
                         <div style="white-space: pre-wrap; word-break: break-all; margin: 0;">
                             {{ info.solution }}
                         </div>
                     </el-descriptions-item>
 
-                    <!-- 关闭原因：保留换行 -->
                     <el-descriptions-item label="关闭原因" v-if="info.closeReason">
                         <div style="white-space: pre-wrap; word-break: break-all; margin: 0;">
                             {{ info.closeReason }}
@@ -31,7 +34,6 @@
                     </el-descriptions-item>
                 </el-descriptions>
 
-                <!-- 按钮组：已验证 / 已关闭 → 全部隐藏 -->
                 <el-button-group style="margin-top:10px" v-if="info.status !== '已验证' && info.status !== '已关闭'">
                     <el-button @click="openTransferDialog">转派</el-button>
 
@@ -52,8 +54,8 @@
         <el-col :span="12">
             <el-card title="流转记录">
                 <el-timeline>
-                    <!-- 全部一行显示：用户 → 状态 → 描述 → 时间 -->
-                    <el-timeline-item v-for="f in [...flows].reverse()" :key="f.id" style="line-height: 1.5;">
+                    <el-timeline-item v-for="f in [...flows].reverse()" :key="f.id"
+                        style="line-height: 1.5; padding: 4px 0;">
                         <span style="font-weight: bold;margin-right:8px;">{{ getUserName(f.operatorId) }}</span>
                         <span style="margin:0 8px;color:#666;">|</span>
                         <span style="margin-right:8px;">{{ f.oldStatus || '初始' }} → {{ f.newStatus }}</span>
@@ -66,10 +68,21 @@
             </el-card>
 
             <el-card title="评论" style="margin-top:10px">
-                <el-input v-model="content" type="textarea" placeholder="输入评论" />
+                <el-input v-model="content" type="textarea" placeholder="输入评论" rows="3" />
                 <el-button type="primary" @click="send" style="margin-top:10px">发送</el-button>
-                <div v-for="c in comments" :key="c.id" style="white-space: pre-wrap;">
-                    {{ c.content }}<br><small>{{ c.createTime }}</small>
+
+                <!-- 评论列表：显示 用户名 + 内容 + 时间 -->
+                <div v-for="c in comments" :key="c.id"
+                    style="margin-top:12px; padding-bottom:8px; border-bottom:1px solid #f5f5f5;">
+                    <div style="font-weight:bold; color:#333;">
+                        {{ getUserName(c.userId) }}
+                    </div>
+                    <div style="white-space: pre-wrap; margin:4px 0; color:#555;">
+                        {{ c.content }}
+                    </div>
+                    <div style="font-size:12px; color:#999;">
+                        {{ c.createTime }}
+                    </div>
                 </div>
             </el-card>
         </el-col>
@@ -90,16 +103,23 @@
         </template>
     </el-dialog>
 
-    <!-- 待验证弹窗 -->
-    <el-dialog v-model="solutionVisible" title="填写解决方法" width="500px">
-        <el-input v-model="solutionForm.solution" type="textarea" rows="4" placeholder="请输入解决方法" />
+    <!-- 待验证：解决方法 + 问题原因 -->
+    <el-dialog v-model="solutionVisible" title="提交待验证" width="550px">
+        <el-form label-width="100px">
+            <el-form-item label="问题原因" required>
+                <el-input v-model="solutionForm.reason" type="textarea" rows="3" placeholder="请填写问题产生的原因" />
+            </el-form-item>
+            <el-form-item label="解决方法" required>
+                <el-input v-model="solutionForm.solution" type="textarea" rows="3" placeholder="请填写具体的解决方法" />
+            </el-form-item>
+        </el-form>
         <template #footer>
             <el-button @click="solutionVisible = false">取消</el-button>
-            <el-button type="primary" @click="submitSolution">确认</el-button>
+            <el-button type="primary" @click="submitSolution">确认提交</el-button>
         </template>
     </el-dialog>
 
-    <!-- 关闭弹窗 -->
+    <!-- 关闭：关闭原因 -->
     <el-dialog v-model="closeVisible" title="填写关闭原因" width="500px">
         <el-input v-model="closeForm.reason" type="textarea" rows="4" placeholder="请输入关闭原因" />
         <template #footer>
@@ -127,15 +147,18 @@ const content = ref('')
 const userList = ref([])
 const user = JSON.parse(sessionStorage.getItem('user'))
 
-// 转派弹窗
+// 转派
 const transferVisible = ref(false)
 const transferForm = ref({ assigneeId: null })
 
-// 待验证弹窗
+// 待验证（新增原因）
 const solutionVisible = ref(false)
-const solutionForm = ref({ solution: '' })
+const solutionForm = ref({
+    reason: '',
+    solution: ''
+})
 
-// 关闭弹窗
+// 关闭
 const closeVisible = ref(false)
 const closeForm = ref({ reason: '' })
 
@@ -180,12 +203,11 @@ const getComment = async () => {
     comments.value = res.data
 }
 
-// ========== 转派逻辑 ==========
+// 转派
 const openTransferDialog = () => {
     transferForm.value.assigneeId = info.value.assigneeId
     transferVisible.value = true
 }
-
 const submitTransfer = async () => {
     if (!transferForm.value.assigneeId) {
         ElMessage.warning('请选择处理人')
@@ -203,7 +225,7 @@ const submitTransfer = async () => {
     getFlow()
 }
 
-// ========== 状态变更 ==========
+// 状态变更
 const setStatus = async (status) => {
     await issueApi.updateStatus({
         id,
@@ -215,29 +237,37 @@ const setStatus = async (status) => {
     getFlow()
 }
 
-// ========== 待验证 ==========
+// 待验证（带原因 + 解决方法）
 const openSolutionDialog = () => {
+    solutionForm.value.reason = ''
     solutionForm.value.solution = ''
     solutionVisible.value = true
 }
 const submitSolution = async () => {
-    if (!solutionForm.value.solution) {
-        ElMessage.warning('请输入解决方法')
+    if (!solutionForm.value.reason) {
+        ElMessage.warning('请填写问题原因')
         return
     }
+    if (!solutionForm.value.solution) {
+        ElMessage.warning('请填写解决方法')
+        return
+    }
+
     await issueApi.updateStatus({
         id,
         status: '待验证',
+        reason: solutionForm.value.reason,
         solution: solutionForm.value.solution,
         operatorId: user.id
     })
+
     solutionVisible.value = false
-    ElMessage.success('已提交解决方法')
+    ElMessage.success('已提交，状态改为待验证')
     getDetail()
     getFlow()
 }
 
-// ========== 关闭 ==========
+// 关闭
 const openCloseDialog = () => {
     closeForm.value.reason = ''
     closeVisible.value = true
