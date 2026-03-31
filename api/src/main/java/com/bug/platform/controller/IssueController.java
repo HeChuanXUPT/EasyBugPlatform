@@ -38,7 +38,7 @@ public class IssueController {
 
     @Value("${file.img-dir}")
     String imgPath;
-    @Value("${file.img-dir}")
+    @Value("${file.img-url}")
     String imgUrl;
 
     // 上报问题
