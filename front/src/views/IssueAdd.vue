@@ -38,8 +38,20 @@
                 </el-select>
             </el-form-item>
 
-            <el-form-item label="问题描述">
-                <el-input v-model="form.content" type="textarea" rows="4" />
+            <el-form-item label="问题描述" required>
+                <div ref="editorRef" contenteditable class="problem-editor" @paste="handlePaste" style="
+            width: 100%;
+            min-height: 180px;
+            padding: 10px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            outline: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+          "></div>
+                <div style="color:#999;font-size:12px;margin-top:4px">
+                    提示：支持文字输入，可直接 Ctrl+V 粘贴截图
+                </div>
             </el-form-item>
 
             <el-form-item label=" ">
@@ -62,6 +74,7 @@ const router = useRouter()
 const projects = ref([])
 const userList = ref([])
 const loginUser = JSON.parse(sessionStorage.getItem('user') || '{}')
+const editorRef = ref(null)
 
 const form = ref({
     title: '',
@@ -74,6 +87,29 @@ const form = ref({
     reporterId: loginUser.id
 })
 
+let isComposing = false
+
+onMounted(() => {
+    getProject()
+    getUsers()
+
+    const el = editorRef.value
+    if (!el) return
+
+    el.addEventListener('compositionstart', () => {
+        isComposing = true
+    })
+    el.addEventListener('compositionend', () => {
+        isComposing = false
+        form.value.content = el.innerHTML
+    })
+    el.addEventListener('input', () => {
+        if (!isComposing) {
+            form.value.content = el.innerHTML
+        }
+    })
+})
+
 const getProject = async () => {
     const res = await projectApi.list()
     projects.value = res.data
@@ -84,18 +120,66 @@ const getUsers = async () => {
     userList.value = res.data
 }
 
+// 粘贴图片（修复：缩略图 + 无小图标 + 点击弹窗）
+const handlePaste = async (e) => {
+    e.preventDefault()
+    const items = e.clipboardData?.items
+    if (!items) return
+
+    for (let item of items) {
+        if (item.type.indexOf('image') === 0) {
+            const file = item.getAsFile()
+            const formData = new FormData()
+            formData.append('file', file)
+
+            try {
+                const res = await issueApi.uploadImage(formData)
+                const imgUrl = res.data
+
+                const sel = window.getSelection()
+                const range = sel.getRangeAt(0)
+                const img = document.createElement('img')
+                img.src = imgUrl
+                img.style.maxWidth = "400px"
+                img.style.height = "auto"
+                img.style.borderRadius = "8px"
+                img.style.margin = "6px 0"
+                img.style.cursor = "zoom-in"
+                img.onclick = () => window.openPreview(imgUrl)
+
+                range.deleteContents()
+                range.insertNode(img)
+                sel.collapseToEnd()
+
+                form.value.content = editorRef.value.innerHTML
+                ElMessage.success("图片上传成功")
+            } catch (err) {
+                ElMessage.error("图片上传失败")
+            }
+        }
+    }
+}
+
 const submit = async () => {
     await issueApi.report(form.value)
-    ElMessage.success('上报成功')
-    router.push('/issue')
+    ElMessage.success("上报成功")
+    router.push("/issue")
 }
 
 const goBack = () => {
-    router.push('/issue')
+    router.push("/issue")
+}
+</script>
+
+<!-- 这里加上你需要的样式 ✅ 解决小图标问题 ✅ -->
+<style scoped>
+.problem-editor img:not([src]) {
+    display: none !important;
 }
 
-onMounted(() => {
-    getProject()
-    getUsers()
-})
-</script>
+.problem-editor img {
+    display: inline-block !important;
+    max-width: 400px !important;
+    height: auto !important;
+}
+</style>

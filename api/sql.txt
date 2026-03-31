@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `issue` (
   `issue_type` varchar(20) DEFAULT NULL COMMENT 'BUG/需求反馈/优化建议',
   `severity` varchar(10) DEFAULT NULL COMMENT 'P0/P1/P2/P3',
   `priority` varchar(10) DEFAULT NULL COMMENT '高/中/低',
-  `content` text CHARACTER SET utf8mb4 COMMENT '问题描述',
+  `content` MEDIUMTEXT CHARACTER SET utf8mb4 COMMENT '问题描述',
   `reporter_id` bigint NOT NULL COMMENT '上报人ID',
   `assignee_id` bigint DEFAULT NULL COMMENT '负责人ID',
   `status` varchar(20) CHARACTER SET utf8mb4 DEFAULT '处理中' COMMENT '状态：处理中、待验证、已验证、关闭',

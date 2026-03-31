@@ -18,3 +18,9 @@ spring:
 #    map-underscore-to-camel-case: true
 #    # 显示SQL日志
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+file:
+  # 图片保存位置
+  img-dir: /tmp
+  # 图片存储链接
+  img-url: http://localhost:8081/img

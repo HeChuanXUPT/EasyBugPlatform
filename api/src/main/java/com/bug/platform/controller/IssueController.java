@@ -14,10 +14,15 @@ import com.bug.platform.service.IIssueService;
 import com.bug.platform.service.IMessageService;
 import com.bug.platform.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/issue")
@@ -31,9 +36,14 @@ public class IssueController {
     @Autowired
     IMessageService messageService;
 
+    @Value("${file.img-dir}")
+    String imgPath;
+    @Value("${file.img-dir}")
+    String imgUrl;
+
     // 上报问题
     @PostMapping("/report")
-    public Result report(@RequestBody Issue issue) {
+    public Result<?> report(@RequestBody Issue issue) {
         issue.setStatus("处理中");
         issue.setCreateTime(LocalDateTime.now());
         issue.setUpdateTime(LocalDateTime.now());
@@ -45,7 +55,7 @@ public class IssueController {
 
     // 删除问题
     @PostMapping("/delete/{id}")
-    public Result delete(@PathVariable Long id) {
+    public Result<?> delete(@PathVariable Long id) {
         issueService.removeById(id);
         flowService.remove(new LambdaQueryWrapper<IssueFlow>().eq(IssueFlow::getIssueId, id));
         commentService.remove(new LambdaQueryWrapper<IssueComment>().eq(IssueComment::getIssueId, id));
@@ -54,7 +64,7 @@ public class IssueController {
 
     // 指派问题
     @PostMapping("/assign")
-    public Result assign(@RequestBody AssignIssueDto assignIssueDto) {
+    public Result<?> assign(@RequestBody AssignIssueDto assignIssueDto) {
         Issue issue = issueService.getById(assignIssueDto.getId());
         String oldStatus = issue.getStatus();
         issue.setId(assignIssueDto.getId());
@@ -68,7 +78,7 @@ public class IssueController {
 
     // 转派
     @PostMapping("/transfer")
-    public Result transfer(@RequestBody TransferDto dto) {
+    public Result<?> transfer(@RequestBody TransferDto dto) {
         Issue issue = issueService.getById(dto.getId());
         String old = issue.getStatus();
         issue.setAssigneeId(dto.getAssigneeId());
@@ -85,7 +95,7 @@ public class IssueController {
 
     // 更新状态
     @PostMapping("/updateStatus")
-    public Result updateStatus(@RequestBody UpdateStatusDto dto) {
+    public Result<?> updateStatus(@RequestBody UpdateStatusDto dto) {
         Issue issue = issueService.getById(dto.getId());
         String old = issue.getStatus();
         issue.setStatus(dto.getStatus());
@@ -131,7 +141,23 @@ public class IssueController {
 
     // 详情
     @GetMapping("/detail/{id}")
-    public Result detail(@PathVariable Long id) {
+    public Result<?> detail(@PathVariable Long id) {
         return Result.success(issueService.getById(id));
+    }
+
+    @PostMapping("/upload/image")
+    public Result<String> uploadImage(@RequestParam MultipartFile file) throws IOException {
+        // TODO：选择合适的文件存储系统
+        String fileName = UUID.randomUUID() + ".png";
+        File uploadDir = new File(imgPath + "/images");
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+        File destFile = new File(uploadDir, fileName);
+        file.transferTo(destFile);
+        // 返回可访问URL
+        // TODO：示例这里搭建了nginx代理图片访问
+        String uri = imgUrl + "/" + fileName;
+        return Result.success(uri);
     }
 }
