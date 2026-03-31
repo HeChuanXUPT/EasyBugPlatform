@@ -12,5 +12,14 @@ export default {
             url: '/issue/delete/' + id,
             method: 'post'
         })
-    }
+    },
+    // 图片上传
+    uploadImage(formData) {
+        return request({
+            url: '/issue/upload/image',
+            method: 'post',
+            headers: { 'Content-Type': 'multipart/form-data' },
+            data: formData
+        })
+    },
 }
