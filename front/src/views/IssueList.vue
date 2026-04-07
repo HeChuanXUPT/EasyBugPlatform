@@ -97,7 +97,7 @@ const isAdmin = ref(loginUser.value.username === 'admin')
 const query = ref({
     projectId: '',
     module: '',
-    status: '',
+    status: '处理中',
     assigneeId: loginUser.value.id,
     title: ''
 })
