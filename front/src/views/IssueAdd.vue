@@ -120,45 +120,77 @@ const getUsers = async () => {
     userList.value = res.data
 }
 
-// 粘贴图片（修复：缩略图 + 无小图标 + 点击弹窗）
+// 修复：同时支持粘贴 文字 + 图片
+// 纯文本粘贴 + 图片粘贴（完美版，格式永远不乱）
 const handlePaste = async (e) => {
-    e.preventDefault()
-    const items = e.clipboardData?.items
-    if (!items) return
+    const items = e.clipboardData?.items;
+    if (!items) return;
 
+    // 判断是否有图片
+    let hasImage = false;
     for (let item of items) {
-        if (item.type.indexOf('image') === 0) {
-            const file = item.getAsFile()
-            const formData = new FormData()
-            formData.append('file', file)
-
-            try {
-                const res = await issueApi.uploadImage(formData)
-                const imgUrl = res.data
-
-                const sel = window.getSelection()
-                const range = sel.getRangeAt(0)
-                const img = document.createElement('img')
-                img.src = imgUrl
-                img.style.maxWidth = "400px"
-                img.style.height = "auto"
-                img.style.borderRadius = "8px"
-                img.style.margin = "6px 0"
-                img.style.cursor = "zoom-in"
-                img.onclick = () => window.openPreview(imgUrl)
-
-                range.deleteContents()
-                range.insertNode(img)
-                sel.collapseToEnd()
-
-                form.value.content = editorRef.value.innerHTML
-                ElMessage.success("图片上传成功")
-            } catch (err) {
-                ElMessage.error("图片上传失败")
-            }
+        if (item.type.indexOf("image") >= 0) {
+            hasImage = true;
+            break;
         }
     }
-}
+
+    if (hasImage) {
+        // ====================
+        // 粘贴图片：正常上传
+        // ====================
+        e.preventDefault();
+        for (let item of items) {
+            if (item.type.indexOf("image") >= 0) {
+                const file = item.getAsFile();
+                const formData = new FormData();
+                formData.append("file", file);
+
+                try {
+                    const res = await issueApi.uploadImage(formData);
+                    const imgUrl = res.data;
+
+                    const sel = window.getSelection();
+                    const range = sel.getRangeAt(0);
+                    const img = document.createElement("img");
+                    img.src = imgUrl;
+                    img.style.maxWidth = "400px";
+                    img.style.height = "auto";
+                    img.style.borderRadius = "8px";
+                    img.style.margin = "6px 0";
+                    img.style.cursor = "zoom-in";
+                    img.onclick = () => window.openPreview(imgUrl);
+
+                    range.deleteContents();
+                    range.insertNode(img);
+                    sel.collapseToEnd();
+                    form.value.content = editorRef.value.innerHTML;
+                    ElMessage.success("图片上传成功");
+                } catch (err) {
+                    ElMessage.error("图片上传失败");
+                }
+            }
+        }
+    } else {
+        // ====================
+        // 粘贴文字 → 纯文本（无格式、不乱）
+        // ====================
+        e.preventDefault();
+        const text = e.clipboardData.getData("text/plain");
+        if (!text) return;
+
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+
+        // 插入纯文本，不带任何样式
+        const textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+        sel.collapseToEnd();
+
+        form.value.content = editorRef.value.innerHTML;
+    }
+};
 
 const submit = async () => {
     await issueApi.report(form.value)
